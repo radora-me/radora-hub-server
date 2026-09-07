@@ -59,7 +59,7 @@ export const createProject = async (req, res) => {
     await activityService.logActivity({
       user,
       action: 'PROJECT_CREATED',
-      projectId: project._id || project.id,
+      projectId: String(project._id || project.id),
       projectTitle: project.title,
       projectCode: project.code,
       message: `${user.name} created new project "${project.title}" (${project.code})`,
@@ -90,7 +90,7 @@ export const updateProject = async (req, res) => {
       await activityService.logActivity({
         user,
         action: 'PROJECT_STATUS_CHANGED',
-        projectId: projData._id || req.params.id,
+        projectId: String(projData._id || req.params.id),
         projectTitle: projData.title,
         projectCode: projData.code,
         message: `${user.name} changed status of "${projData.title}" from "${oldStatus}" to "${req.body.status}"`,
@@ -100,7 +100,7 @@ export const updateProject = async (req, res) => {
       await activityService.logActivity({
         user,
         action: 'PROJECT_UPDATED',
-        projectId: projData._id || req.params.id,
+        projectId: String(projData._id || req.params.id),
         projectTitle: projData.title,
         projectCode: projData.code,
         message: `${user.name} updated project details for "${projData.title}"`,

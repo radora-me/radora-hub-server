@@ -51,7 +51,7 @@ export const activityService = {
         userRole: resolvedUserRole,
         userAvatar: resolvedUserAvatar,
         action,
-        projectId: projectId || null,
+        projectId: projectId ? String(projectId) : null,
         projectTitle: projectTitle || 'General',
         projectCode: projectCode || '',
         message,
@@ -107,7 +107,10 @@ export const activityService = {
     if (isMongoConnected) {
       try {
         const query = {};
-        if (projectId) query.projectId = projectId;
+        if (projectId) {
+          // Match projectId as string since it can be stored as ObjectId or String
+          query.projectId = String(projectId);
+        }
         if (action && action !== 'ALL') {
           if (action === 'CHECKLIST') {
             query.action = { $in: ['CHECKLIST_ITEM_CHECKED', 'CHECKLIST_ITEM_UNCHECKED', 'CHECKLIST_ITEM_ADDED', 'CHECKLIST_ITEM_DELETED'] };
@@ -142,7 +145,9 @@ export const activityService = {
 
     // LocalStore fallback
     const db = readLocal();
-    let list = db.activityLogs || [];
+    let list = [...(db.activityLogs || [])].sort(
+      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    );
 
     if (projectId) {
       list = list.filter(a => String(a.projectId) === String(projectId));
@@ -182,12 +187,28 @@ export const activityService = {
       }
 
       console.log('[ActivityService] Seeding baseline activity history...');
+
+      // Look up the actual Radora Next project to get its real _id
+      let radoraProjectId = null;
+      try {
+        const { dataService } = await import('./dataService.js');
+        const projects = await dataService.getProjects({});
+        const radoraNext = projects.find(p => p.title === 'Radora Next' || p.code === 'RAD-NEXT');
+        if (radoraNext) {
+          radoraProjectId = String(radoraNext._id || radoraNext.id);
+          console.log('[ActivityService] Found Radora Next project ID:', radoraProjectId);
+        }
+      } catch (e) {
+        console.warn('[ActivityService] Could not look up Radora Next project:', e.message);
+      }
+
       const baselineActivities = [
         {
           userName: 'Kartikey Pandey',
           userEmail: 'kartikey.pandey@radora.tech',
           userRole: 'architect_admin',
           action: 'PROJECT_CREATED',
+          projectId: radoraProjectId,
           projectTitle: 'Radora Next',
           projectCode: 'RAD-NEXT',
           message: 'Kartikey Pandey initialized enterprise project "Radora Next"',
@@ -199,6 +220,7 @@ export const activityService = {
           userEmail: 'kartikey.pandey@radora.tech',
           userRole: 'architect_admin',
           action: 'TEMPLATE_INSTANTIATED',
+          projectId: radoraProjectId,
           projectTitle: 'Radora Next',
           projectCode: 'RAD-NEXT',
           message: 'Instantiated checklist blueprint "Radora Next — Full Platform Checklist" (458 items)',
@@ -210,6 +232,7 @@ export const activityService = {
           userEmail: 'team@radora.tech',
           userRole: 'team_member',
           action: 'CHECKLIST_ITEM_CHECKED',
+          projectId: radoraProjectId,
           projectTitle: 'Radora Next',
           projectCode: 'RAD-NEXT',
           message: 'Radhikey Team marked checkbox "Verify PostgreSQL connection pooling" as Completed',
@@ -221,6 +244,7 @@ export const activityService = {
           userEmail: 'kartikey.pandey@radora.tech',
           userRole: 'architect_admin',
           action: 'CHECKLIST_ITEM_CHECKED',
+          projectId: radoraProjectId,
           projectTitle: 'Radora Next',
           projectCode: 'RAD-NEXT',
           message: 'Kartikey Pandey marked checkbox "Configure MongoDB Atlas sharded cluster" as Completed',

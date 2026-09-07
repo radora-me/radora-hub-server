@@ -30,8 +30,7 @@ const activitySchema = new mongoose.Schema(
       required: true, // 'CHECKLIST_ITEM_CHECKED', 'CHECKLIST_ITEM_UNCHECKED', 'PROJECT_STATUS_CHANGED', 'PROJECT_UPDATED', 'PROJECT_CREATED', 'CHECKLIST_ITEM_ADDED', 'TEMPLATE_INSTANTIATED'
     },
     projectId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Project',
+      type: mongoose.Schema.Types.Mixed,
       required: false,
     },
     projectTitle: {

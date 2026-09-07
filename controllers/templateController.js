@@ -99,7 +99,7 @@ export const instantiateTemplate = async (req, res) => {
     await activityService.logActivity({
       user,
       action: 'TEMPLATE_INSTANTIATED',
-      projectId,
+      projectId: String(projectId),
       projectTitle: project?.title || 'Project',
       projectCode: project?.code || 'RAD',
       message: `${user.name} instantiated checklist "${checklist.title}" into project "${project?.title || 'Project'}"`,

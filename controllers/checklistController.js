@@ -136,7 +136,7 @@ export const updateChecklistItem = async (req, res) => {
       await activityService.logActivity({
         user,
         action: actionType,
-        projectId: project?._id || existingChecklist?.projectId,
+        projectId: String(project?._id || existingChecklist?.projectId),
         projectTitle: projTitle,
         projectCode: project?.code || 'RAD',
         message,
@@ -244,7 +244,7 @@ export const addItem = async (req, res) => {
     await activityService.logActivity({
       user,
       action: 'CHECKLIST_ITEM_ADDED',
-      projectId: project?._id || checklist.projectId,
+      projectId: String(project?._id || checklist.projectId),
       projectTitle: project?.title || 'Radora Next',
       projectCode: project?.code || 'RAD',
       message: `${user.name} added task "${newItem.text}" under section "${section.name}" in ${project?.title || 'project'}`,
@@ -293,7 +293,7 @@ export const deleteItem = async (req, res) => {
     await activityService.logActivity({
       user,
       action: 'CHECKLIST_ITEM_DELETED',
-      projectId: project?._id || checklist.projectId,
+      projectId: String(project?._id || checklist.projectId),
       projectTitle: project?.title || 'Radora Next',
       projectCode: project?.code || 'RAD',
       message: `${user.name} removed task "${deletedText}" from section "${section.name}" in ${project?.title || 'project'}`,
